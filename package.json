@@ -1,0 +1,78 @@
+{
+  "name": "fleet",
+  "version": "1.0.0",
+  "description": "A private, fast Markdown notes sidebar for macOS",
+  "main": "main.js",
+  "build": {
+    "appId": "com.rangercreaky.fleet",
+    "productName": "Fleet",
+    "publish": {
+      "provider": "github",
+      "owner": "RangerCreaky",
+      "repo": "Fleet",
+      "private": false
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "build/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "afterSign": "scripts/notarize.js",
+    "files": [
+      "main.js",
+      "storage.js",
+      "geometry.js",
+      "jira-client.js",
+      "jira-normalize.js",
+      "preload.js",
+      "LICENSE",
+      "EULA.md",
+      "renderer/**/*",
+      "node_modules/**/*"
+    ]
+  },
+  "scripts": {
+    "dist": "npm run dist:release",
+    "dist:release": "node scripts/release-preflight.js && electron-builder --mac --publish never",
+    "dist:dir": "node scripts/dev-build.js",
+    "verify:release": "node scripts/verify-release.js",
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "test": "node --test"
+  },
+  "keywords": [
+    "notes",
+    "productivity",
+    "sidebar",
+    "markdown"
+  ],
+  "author": "Navaneeth Penumarthi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RangerCreaky/Fleet.git"
+  },
+  "homepage": "https://github.com/RangerCreaky/Fleet",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "dompurify": "^3.4.14",
+    "electron-updater": "^6.8.9",
+    "marked": "^18.0.10"
+  },
+  "devDependencies": {
+    "@electron/notarize": "^2.5.0",
+    "electron": "^43.4.1",
+    "electron-builder": "^26.15.3",
+    "jsdom": "^26.1.0"
+  }
+}

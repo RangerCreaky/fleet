@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: fleet-asset: sidenote-asset:; font-src 'self'; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Fleet</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="../node_modules/dompurify/dist/purify.min.js"></script>
+  <script src="../node_modules/marked/lib/marked.umd.js"></script>
+  <script src="security.js"></script>
+</head>
+
+<body>
+  <div id="app" data-side="right">
+    <!-- Collapsed dock handle -->
+    <button id="collapsed-strip" class="collapsed-strip collapsed-strip--capsule" type="button" aria-label="Open Fleet">
+      <div class="strip-indicator"></div>
+      <span class="strip-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" />
+          <path d="M14.5 3v5.5H20" />
+          <path d="M8.5 13h7M8.5 16.5h4.5" />
+        </svg>
+      </span>
+    </button>
+
+    <!-- Expanded panel -->
+    <div id="expanded-panel" class="expanded-panel hidden">
+      <div id="resize-handle" class="resize-handle" title="Drag to resize width"></div>
+      <div id="resize-handle-v" class="resize-handle-v" title="Drag to resize height"></div>
+      <div id="resize-handle-corner" class="resize-handle-corner" title="Drag to resize"></div>
+
+      <!-- Top bar -->
+      <div id="top-bar" class="top-bar">
+        <button id="btn-back" class="btn-icon hidden" title="Back" aria-label="Back">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 5l-7 7 7 7" />
+          </svg>
+        </button>
+        <h1 id="top-title" class="top-title">Fleet</h1>
+        <div class="top-bar-actions">
+          <button id="btn-search-toggle" class="btn-icon" title="Search (Cmd+F)" aria-label="Search notes">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.9-3.9" />
+            </svg>
+          </button>
+          <button id="btn-jira" class="btn-icon btn-jira" title="Jira Space" aria-label="Open Jira Space" aria-pressed="false">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2.8 20.8 12 12 21.2 3.2 12 12 2.8Z" fill="currentColor"/>
+              <path d="m12 7.1 4.7 4.9-4.7 4.9L7.3 12 12 7.1Z" fill="var(--surface-panel)"/>
+              <path d="m12 9.8 2.1 2.2-2.1 2.2L9.9 12l2.1-2.2Z" fill="currentColor"/>
+            </svg>
+          </button>
+          <button id="btn-overflow" class="btn-icon" title="More" aria-label="More" aria-haspopup="menu"
+            aria-expanded="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="5" r="1" />
+              <circle cx="12" cy="12" r="1" />
+              <circle cx="12" cy="19" r="1" />
+            </svg>
+          </button>
+          <button id="btn-collapse" class="btn-icon" title="Collapse" aria-label="Collapse Fleet">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search bar -->
+      <div id="search-bar" class="search-bar hidden">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7" />
+          <path d="M20 20l-3.9-3.9" />
+        </svg>
+        <input type="text" id="search-input" placeholder="Search notes" />
+        <span id="search-count" class="search-count"></span>
+        <button id="btn-search-clear" class="btn-icon hidden" title="Clear search" aria-label="Clear search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div id="storage-status" class="storage-status" role="status" aria-live="polite" aria-hidden="true">
+        <span id="storage-status-message"></span>
+        <button id="storage-status-action" class="storage-status-action hidden" type="button">Retry</button>
+      </div>
+
+      <div id="shortcut-onboarding" class="shortcut-onboarding hidden" role="dialog" aria-modal="true" aria-labelledby="shortcut-onboarding-title">
+        <div id="shortcut-onboarding-title" class="shortcut-onboarding-title">Quick access shortcut</div>
+        <p>Use <strong>Cmd+Shift+Space</strong> (or Ctrl+Shift+Space) to show Fleet from any app.</p>
+        <div class="shortcut-onboarding-actions">
+          <button id="shortcut-onboarding-keep" type="button" class="btn btn--primary">Keep shortcut</button>
+          <button id="shortcut-onboarding-customize" type="button" class="btn">Customize</button>
+          <button id="shortcut-onboarding-disable" type="button" class="btn">Disable</button>
+        </div>
+      </div>
+
+      <!-- Content area -->
+      <div id="content-area" class="content-area">
+        <!-- Folder list view -->
+        <div id="folder-list-view" class="view">
+          <div id="folder-list" class="folder-list"></div>
+          <button id="btn-add-folder" class="btn-add" title="New Folder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>New Folder</span>
+          </button>
+        </div>
+
+        <!-- Notes view (inside a folder) -->
+        <div id="notes-view" class="view hidden">
+          <button id="btn-add-note" class="btn-add" title="New Note (Cmd+N)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+              stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span>New Note</span>
+          </button>
+          <div id="notes-list" class="notes-list"></div>
+        </div>
+
+        <!-- Jira Cloud lives outside the local folder/note data model. -->
+        <div id="jira-list-view" class="view hidden" aria-live="polite">
+          <div id="jira-content" class="jira-space"></div>
+        </div>
+
+        <div id="jira-detail-view" class="view hidden">
+          <div id="jira-detail" class="jira-space"></div>
+        </div>
+
+        <!-- Settings view -->
+        <div id="settings-view" class="view hidden">
+          <div class="settings-section">
+            <div class="settings-section-title">Toggle shortcut</div>
+            <div class="settings-section-desc">Global keyboard shortcut to show or hide Fleet from any application.</div>
+            <div id="shortcut-recorder" class="shortcut-recorder" tabindex="0" role="button">
+              <span id="shortcut-display" class="shortcut-display"></span>
+              <span class="shortcut-hint">Click to record</span>
+            </div>
+            <div id="shortcut-error" class="shortcut-error hidden"></div>
+            <div class="settings-actions">
+              <button id="btn-reset-shortcut" type="button" class="btn">Reset to default</button>
+              <button id="btn-disable-shortcut" type="button" class="btn">Disable</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Appearance</div>
+            <div class="settings-section-desc">Default text size for new notes and rendered previews.</div>
+            <div class="settings-row settings-row--split">
+              <span>Font size</span>
+              <div class="stepper">
+                <button id="btn-default-font-dec" type="button" aria-label="Decrease default font size">&#8722;</button>
+                <output id="default-font-size-value" aria-live="polite">13</output>
+                <button id="btn-default-font-inc" type="button" aria-label="Increase default font size">+</button>
+              </div>
+            </div>
+            <div id="font-preview" class="font-preview">The quick brown fox jumps over the lazy dog.</div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Dock</div>
+            <div class="settings-section-desc">Where Fleet rests when collapsed. Drag the handle itself to move it up or down.</div>
+            <div class="settings-row settings-row--split">
+              <span>Screen edge</span>
+              <div class="segmented" id="dock-side" role="group" aria-label="Dock edge">
+                <button type="button" data-side="left" aria-pressed="false">Left</button>
+                <button type="button" data-side="right" aria-pressed="true">Right</button>
+              </div>
+            </div>
+            <div class="settings-row settings-row--split">
+              <span>Collapsed shape</span>
+              <div class="segmented" id="dock-style" role="group" aria-label="Collapsed shape">
+                <button type="button" data-style="capsule" aria-pressed="true">Capsule</button>
+                <button type="button" data-style="icon" aria-pressed="false">Icon</button>
+              </div>
+            </div>
+            <div class="settings-actions">
+              <button id="btn-reset-dock" type="button" class="btn">Center the handle</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Data</div>
+            <div class="settings-section-desc">Back up your notes or collect a diagnostics report.</div>
+            <div class="settings-actions">
+              <button id="btn-export-backup" type="button" class="btn">Export backup</button>
+              <button id="btn-restore-backup" type="button" class="btn">Restore backup</button>
+              <button id="btn-export-diagnostics" type="button" class="btn">Diagnostics</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-section-title">Updates</div>
+            <div class="settings-section-desc">Fleet checks GitHub Releases only when you opt in.</div>
+            <label class="settings-toggle">
+              <span>Check for updates</span>
+              <span class="switch">
+                <input id="updates-enabled" type="checkbox">
+                <span class="switch-track"></span>
+              </span>
+            </label>
+            <div class="settings-actions">
+              <button id="btn-check-updates" type="button" class="btn">Check now</button>
+              <button id="btn-open-release" type="button" class="btn">Release page</button>
+            </div>
+            <div id="update-status" class="settings-section-desc" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div id="favourites-view" class="view hidden">
+          <div id="favourites-list" class="notes-list"></div>
+        </div>
+
+        <div id="trash-view" class="view hidden">
+          <div id="trash-list" class="notes-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overflow menu -->
+    <div id="overflow-menu" class="popover hidden" role="menu">
+      <button class="popover-item" data-view="favourites" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.78L12 16.77l-5.2 2.73.99-5.78-4.21-4.1 5.82-.85z" />
+        </svg>
+        <span>Favourites</span>
+      </button>
+      <button class="popover-item" data-view="trash" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 6h18" />
+          <path d="M8.5 6V4.5A1.5 1.5 0 0 1 10 3h4a1.5 1.5 0 0 1 1.5 1.5V6" />
+          <path d="M18.5 6l-.9 13.1a1.5 1.5 0 0 1-1.5 1.4H7.9a1.5 1.5 0 0 1-1.5-1.4L5.5 6" />
+          <path d="M10 10.5v6M14 10.5v6" />
+        </svg>
+        <span>Trash</span>
+      </button>
+      <div class="popover-divider"></div>
+      <button class="popover-item" data-view="settings" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+        <span>Settings</span>
+      </button>
+    </div>
+
+    <!-- Folder context menu -->
+    <div id="context-menu" class="popover context-menu hidden" role="menu">
+      <button class="context-item" data-action="rename" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9" />
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+        </svg>
+        Rename
+      </button>
+      <button class="context-item" data-action="delete" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3.5 6h17" />
+          <path d="M8.5 6V4.5A1.5 1.5 0 0 1 10 3h4a1.5 1.5 0 0 1 1.5 1.5V6" />
+          <path d="M18.5 6l-.9 13.1a1.5 1.5 0 0 1-1.5 1.4H7.9a1.5 1.5 0 0 1-1.5-1.4L5.5 6" />
+        </svg>
+        Delete
+      </button>
+    </div>
+
+    <!-- Formatting menu -->
+    <div id="format-dropdown" class="popover format-dropdown hidden" role="menu">
+      <button class="format-item" data-format="todo" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="3" />
+          <path d="M8.5 12l2.5 2.5 4.5-5" />
+        </svg>
+        <span>Todo</span><kbd>Cmd Shift T</kbd>
+      </button>
+      <button class="format-item" data-format="picture" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="16" rx="2" />
+          <circle cx="8.5" cy="9.5" r="1.5" />
+          <path d="M21 15.5L16 11l-8 8" />
+        </svg>
+        <span>Picture</span><kbd>Cmd Shift I</kbd>
+      </button>
+      <button class="format-item" data-format="link" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </svg>
+        <span>Link</span><kbd>Cmd K</kbd>
+      </button>
+      <div class="popover-divider format-divider"></div>
+      <button class="format-item" data-format="header" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 4v16M18 4v16M6 12h12" />
+        </svg>
+        <span>Header</span><kbd>Cmd Shift H</kbd>
+      </button>
+      <button class="format-item" data-format="quote" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 5v14" />
+          <path d="M10 8h9M10 12h9M10 16h6" />
+        </svg>
+        <span>Quote</span><kbd>Cmd Shift '</kbd>
+      </button>
+      <div class="popover-divider format-divider"></div>
+      <button class="format-item" data-format="bold" role="menuitem">
+        <strong>B</strong>
+        <span>Bold</span><kbd>Cmd B</kbd>
+      </button>
+      <button class="format-item" data-format="italic" role="menuitem">
+        <em>I</em>
+        <span>Italic</span><kbd>Cmd I</kbd>
+      </button>
+      <button class="format-item" data-format="highlight" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 20h16" />
+          <path d="M6.5 16.5l8-8 3 3-8 8h-3z" />
+          <path d="M13.5 5.5l3 3" />
+        </svg>
+        <span>Highlight</span><kbd>Cmd Shift M</kbd>
+      </button>
+      <button class="format-item" data-format="strike" role="menuitem">
+        <s>S</s>
+        <span>Strikethrough</span><kbd>Cmd Shift X</kbd>
+      </button>
+      <div class="popover-divider format-divider"></div>
+      <button class="format-item" data-format="list" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 6h11M9 12h11M9 18h11" />
+          <circle cx="4.5" cy="6" r="1" />
+          <circle cx="4.5" cy="12" r="1" />
+          <circle cx="4.5" cy="18" r="1" />
+        </svg>
+        <span>List</span><kbd>Cmd Shift L</kbd>
+      </button>
+      <button class="format-item" data-format="ordered_list" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 6h10M10 12h10M10 18h10" />
+          <path d="M4 6h1v4" />
+          <path d="M4 10h2" />
+          <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
+        </svg>
+        <span>Ordered List</span><kbd>Cmd Shift O</kbd>
+      </button>
+      <button class="format-item" data-format="code" role="menuitem">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 18l6-6-6-6" />
+          <path d="M8 6l-6 6 6 6" />
+        </svg>
+        <span>Code</span><kbd>Cmd E</kbd>
+      </button>
+    </div>
+  </div>
+
+  <div id="toast-region" class="toast-region" role="status" aria-live="polite" aria-atomic="true">
+    <span id="toast-message"></span>
+    <button id="toast-action" type="button" class="toast-action hidden">Undo</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>

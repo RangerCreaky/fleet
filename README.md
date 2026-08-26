@@ -2,7 +2,7 @@
 
 A **productivity sidebar note-taking app for macOS** built with Electron. Fleet lives on the right edge of your screen: a slim strip you can expand into a full panel for folders, Markdown notes, quick capture, and Jira work—without leaving your current window.
 
-[Download the latest macOS DMG](https://github.com/RangerCreaky/Fleet/releases/latest) · [View releases](https://github.com/RangerCreaky/Fleet/releases) · [MIT License](LICENSE)
+[Download the latest macOS DMG](https://github.com/RangerCreaky/Fleet/releases/latest) · [View releases](https://github.com/RangerCreaky/Fleet/releases) 
 
 Fleet is free and open source. It has no Fleet account, hosted backend, note-sync service, analytics service, or external database.
 

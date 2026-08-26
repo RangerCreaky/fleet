@@ -31,10 +31,11 @@ test("keeps Fleet note-first positioning and Vercel-safe metadata", async () => 
 
   assert.match(page, /A faster home for the notes that keep work moving\./);
   assert.match(page, /pull your work into a separate Jira Space/i);
-  assert.match(layout, /Fast private notes with Jira when you need it/);
+  assert.match(layout, /Open-source private notes with Jira when you need it/);
   assert.match(config, /VERCEL_PROJECT_PRODUCTION_URL/);
   assert.match(config, /NEXT_PUBLIC_FLEET_SITE_URL/);
-  assert.match(config, /NEXT_PUBLIC_FLEET_DOWNLOAD_URL/);
+  assert.match(config, /github\.com\/RangerCreaky\/Fleet\/releases\/latest/);
+  assert.doesNotMatch(config, /NEXT_PUBLIC_FLEET_DOWNLOAD_URL|1\.0\.0-beta/);
 });
 
 test("keeps the installer out of Git-backed Vercel deployments", async () => {
@@ -44,8 +45,25 @@ test("keeps the installer out of Git-backed Vercel deployments", async () => {
   ]);
 
   assert.match(ignore, /^\/public\/downloads\/\*\.dmg$/m);
-  assert.match(download, /Download universal DMG/);
-  assert.match(download, /downloadSha256/);
+  assert.match(download, /Open latest GitHub release/);
+  assert.match(download, /latestReleaseUrl/);
+  assert.doesNotMatch(download, /downloadSha256|Fleet-1\.0\.0-beta-universal/);
+});
+
+test("publishes open-source and local-data guarantees without hiding direct Jira traffic", async () => {
+  const [license, readme, privacy, security] = await Promise.all([
+    read("../LICENSE"),
+    read("../README.md"),
+    read("app/privacy/page.tsx"),
+    read("app/security/page.tsx"),
+  ]);
+
+  assert.match(license, /^MIT License/);
+  assert.match(readme, /releases\/latest/);
+  assert.match(readme, /no Fleet backend, hosted account, telemetry pipeline, advertising SDK, or external database/i);
+  assert.match(privacy, /not sent to Fleet’s developer, website, analytics, or any Fleet database/i);
+  assert.match(privacy, /travel directly from the Fleet desktop application to the Jira Cloud site/i);
+  assert.match(security, /Fleet has no backend or external database/i);
 });
 
 test("includes every public product, support, and legal route", async () => {

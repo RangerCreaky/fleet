@@ -2410,6 +2410,56 @@ button {
 .jira-detail-section > summary { cursor: pointer; }
 .jira-detail-section[open] > summary { margin-bottom: var(--sp-4); }
 
+.jira-development-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.jira-branch-suggestion {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.jira-branch-value {
+  min-width: 0;
+  flex: 1 1 320px;
+}
+
+.jira-branch-value > span {
+  display: block;
+  margin-bottom: var(--sp-2);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+}
+
+.jira-branch-name {
+  display: block;
+  width: 100%;
+  padding: var(--sp-3);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-control);
+  background: var(--surface-panel);
+  color: var(--text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.jira-copy-branch {
+  margin-left: auto;
+  min-width: 74px;
+}
+
+.jira-copy-branch.is-copied {
+  border-color: #4BCE97;
+  color: #7EE2B8;
+}
+
 .jira-rich-text {
   margin-top: var(--sp-3);
   color: var(--text-secondary);

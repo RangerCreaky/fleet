@@ -1,23 +1,16 @@
-# Fleet End User License Agreement
+# Fleet Open-Source Licence Notice
 
-Copyright (c) 2026 Navaneeth Penumarthi. All rights reserved.
+Copyright (c) 2026 Navaneeth Penumarthi.
 
-This End User License Agreement ("Agreement") grants a limited, non-exclusive,
-non-transferable license to use the Fleet application obtained from an
-authorized source. You may install and use the application for your own lawful
-business or personal work. You may not reverse engineer, modify, redistribute,
-resell, sublicense, or create derivative works from the application except where
-applicable law expressly permits it or the copyright holder gives written
-permission.
+Fleet source code and Fleet release binaries are distributed under the
+[MIT License](LICENSE). The MIT License permits use, copying, modification,
+distribution, sublicensing, and sale subject to preservation of its copyright
+and permission notice.
 
-Fleet stores notes locally on your device. You are responsible for keeping
-your own backups and for protecting access to your device. The application is
-provided "as is" to the maximum extent permitted by law, without warranties of
-any kind. To the extent permitted by law, the copyright holder is not liable for
-indirect, incidental, special, or consequential damages arising from use of the
-application.
+This notice does not add restrictions to the MIT License. Fleet is provided
+"as is", without warranty, as described in the licence. Third-party components
+remain governed by their respective licences.
 
-This Agreement does not transfer ownership of the application or its source
-code. The copyright holder may update the application and this Agreement for
-future releases. Questions about commercial licensing should be directed to the
-copyright holder.
+Fleet connects to Jira only when configured by the user. Users remain
+responsible for their device security, backups, Jira account permissions,
+organisation policies, and actions submitted to Jira.

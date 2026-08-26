@@ -1,5 +1,28 @@
 const CURRENT_SPRINT_JQL = 'assignee = currentUser() AND sprint in openSprints() ORDER BY Rank ASC, updated DESC';
 const JIRA_ACCOUNT_ID_RE = /^[A-Za-z0-9:_-]{1,256}$/;
+const MAX_SUGGESTED_BRANCH_LENGTH = 200;
+
+function suggestBranchName(issueKey, summary) {
+  const key = String(issueKey || '').trim().toUpperCase();
+  if (!key) return '';
+  const asciiSummary = String(summary || '')
+    .toLowerCase()
+    .replace(/ß/g, 'ss')
+    .replace(/æ/g, 'ae')
+    .replace(/œ/g, 'oe')
+    .replace(/ø/g, 'o')
+    .replace(/ł/g, 'l')
+    .replace(/ð/g, 'd')
+    .replace(/þ/g, 'th')
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '');
+  const slug = asciiSummary.replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (!slug) return key;
+  const available = MAX_SUGGESTED_BRANCH_LENGTH - key.length - 1;
+  if (available <= 0) return key;
+  const shortenedSlug = slug.slice(0, available).replace(/-+$/g, '');
+  return shortenedSlug ? `${key}-${shortenedSlug}` : key;
+}
 
 function currentSprintJql(monitoredUsers = []) {
   const ids = Array.from(new Set((Array.isArray(monitoredUsers) ? monitoredUsers : [])
@@ -168,6 +191,6 @@ function validateUpdateFields(fields, editableIds) {
 }
 
 module.exports = {
-  CURRENT_SPRINT_JQL, JIRA_ACCOUNT_ID_RE, currentSprintJql, adfToText, textToAdf, discoverFields, normalizeIssue,
+  CURRENT_SPRINT_JQL, JIRA_ACCOUNT_ID_RE, currentSprintJql, suggestBranchName, adfToText, textToAdf, discoverFields, normalizeIssue,
   normalizeEditableFields, normalizeTransitionFields, groupIssues, validateUpdateFields
 };

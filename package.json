@@ -1,6 +1,6 @@
 {
   "name": "fleet",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A private, fast Markdown notes sidebar for macOS",
   "main": "main.js",
   "build": {
@@ -63,7 +63,7 @@
     "url": "https://github.com/RangerCreaky/Fleet.git"
   },
   "homepage": "https://github.com/RangerCreaky/Fleet",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "dependencies": {
     "dompurify": "^3.4.14",
     "electron-updater": "^6.8.9",

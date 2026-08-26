@@ -2283,6 +2283,13 @@ function renderJiraDetail() {
         <div><span>Assignee</span><strong>${escapeHtml(detail.assignee?.displayName || 'Unassigned')}</strong></div>
         <div><span>Updated</span><strong>${escapeHtml(formatDate(detail.updated))}</strong></div>
       </div>
+      <section class="jira-detail-section jira-development-section">
+        <h3>Development</h3>
+        <div class="jira-branch-suggestion">
+          <div class="jira-branch-value"><span>Suggested branch name</span><code class="jira-branch-name">${escapeHtml(detail.suggestedBranchName || detail.key)}</code></div>
+          <button type="button" class="btn btn--sm jira-copy-branch" aria-label="Copy suggested branch name">Copy</button>
+        </div>
+      </section>
       <section class="jira-detail-section"><h3>Description</h3><div class="jira-rich-text">${jiraTextHtml(detail.description)}</div></section>
       <section class="jira-detail-section"><h3>Acceptance criteria</h3><div class="jira-rich-text">${jiraTextHtml(detail.acceptanceCriteria, 'No acceptance criteria field is mapped.')}</div></section>
       ${detail.subtasks?.length ? `<section class="jira-detail-section"><h3>Subtasks</h3><div class="jira-subtasks">${detail.subtasks.map(subtask => `<button type="button" class="jira-subtask" data-issue-key="${escapeHtml(subtask.key)}"><span>${escapeHtml(subtask.key)} · ${escapeHtml(subtask.summary)}</span><small>${escapeHtml(subtask.status || '')}${subtask.assignee?.displayName ? ` · ${escapeHtml(subtask.assignee.displayName)}` : ''}</small></button>`).join('')}</div></section>` : ''}
@@ -2557,6 +2564,30 @@ function attachJiraDetailEvents() {
     jiraDetail.querySelector('.jira-open-external')?.addEventListener('click', async () => {
         try { jiraUnwrap(await window.electronAPI.jiraOpenIssue(detail.key)); }
         catch (error) { showToast(jiraErrorMessage(error), 'error'); }
+    });
+    jiraDetail.querySelector('.jira-copy-branch')?.addEventListener('click', async event => {
+        const button = event.currentTarget;
+        const branchName = detail.suggestedBranchName || detail.key;
+        if (!branchName || button.disabled) return;
+        button.disabled = true;
+        button.textContent = 'Copying…';
+        try {
+            const result = await window.electronAPI.copyToClipboard(branchName);
+            if (!result?.success) throw new Error(result?.error || 'Clipboard write failed.');
+            button.textContent = 'Copied';
+            button.classList.add('is-copied');
+            window.setTimeout(() => {
+                if (!button.isConnected) return;
+                button.disabled = false;
+                button.textContent = 'Copy';
+                button.classList.remove('is-copied');
+            }, 1500);
+        } catch {
+            button.disabled = false;
+            button.textContent = 'Copy';
+            button.classList.remove('is-copied');
+            showToast('Could not copy the branch name.', 'error');
+        }
     });
     bindJiraMultiselects(jiraDetail, detail.editableFields || []);
     const editSection = jiraDetail.querySelector('.jira-edit-section');

@@ -2,6 +2,10 @@
 
 A **productivity sidebar note-taking app for macOS** built with Electron. Fleet lives on the right edge of your screen: a slim strip you can expand into a full panel for folders, Markdown notes, quick capture, and Jira work—without leaving your current window.
 
+[Download the latest macOS DMG](https://github.com/RangerCreaky/Fleet/releases/latest) · [View releases](https://github.com/RangerCreaky/Fleet/releases) · [MIT License](LICENSE)
+
+Fleet is free and open source. It has no Fleet account, hosted backend, note-sync service, analytics service, or external database.
+
 ---
 
 ## Requirements
@@ -12,6 +16,10 @@ A **productivity sidebar note-taking app for macOS** built with Electron. Fleet 
 ---
 
 ## Installation & running
+
+### Download the latest release
+
+Open the [latest GitHub release](https://github.com/RangerCreaky/Fleet/releases/latest) and download the universal macOS `.dmg` asset. Release notes, checksums, known limitations, and installation information are published with each release.
 
 ### From source (development)
 
@@ -112,11 +120,20 @@ Fleet includes a separate Jira Space behind the Jira icon in the header. This bu
 
 The credential is encrypted with Electron `safeStorage` in a separate `jira-credentials.bin` file. It is never written to `fleet-data.json` or included in Fleet backups. The renderer still has `connect-src 'none'`; Jira requests travel through narrow Electron IPC handlers to the Electron main process.
 
+Fleet does not send the Jira site, account email, or API token to a Fleet server, developer-operated database, analytics provider, or the Fleet website. The token remains encrypted on the laptop and is used only by the Electron main process to authenticate requests sent directly to the Jira Cloud site configured by the user.
+
 After connecting, Fleet can browse assigned active-sprint work, inspect issue metadata and subtasks, edit fields Jira reports as editable, manage permitted comments, and run available workflow transitions. Jira remains the source of truth: issue content is not copied into local folders or available for offline editing. Company administrators can disable API-token access, so this local connection mode is intended for personal or controlled internal use rather than a publicly distributed integration.
 
-### Data storage
+### Privacy and data boundaries
 
-- Your data is stored locally in the app’s user data directory as **`fleet-data.json`** (folders, notes, and settings such as panel width). Existing SideNote installations are migrated automatically while retaining their prior Application Support directory so notes, attachments, and encrypted Jira credentials remain available.
+- Notes, folders, settings, Trash, managed attachments, local diagnostics, and backups remain on the user’s laptop. Fleet does not upload or sync them.
+- Fleet has no Fleet backend, hosted account, telemetry pipeline, advertising SDK, or external database.
+- Jira credentials are encrypted locally with Electron `safeStorage`, kept outside note data and backups, and never sent to Fleet’s developer or website.
+- Jira issue reads and user-requested writes travel directly between Fleet and the configured Atlassian Jira Cloud site. Jira therefore receives the issue data and authorization needed to perform those requests.
+- Update checks are disabled by default. If enabled or manually requested, Fleet contacts GitHub Releases to check for a newer version.
+- Opening a web link or deliberately exporting and sharing diagnostics sends data only through the destination or sharing method selected by the user.
+
+The primary local note store is **`fleet-data.json`** in Fleet’s application-data directory. Existing SideNote installations are migrated automatically while retaining their prior Application Support directory so notes, attachments, and encrypted Jira credentials remain available.
 
 ---
 
@@ -132,5 +149,6 @@ After connecting, Fleet can browse assigned active-sprint work, inspect issue me
 
 ## License
 
-Fleet is proprietary software. See [LICENSE](LICENSE) and [EULA.md](EULA.md)
-for the commercial terms.
+Fleet is free and open-source software released under the [MIT License](LICENSE).
+Release binaries are distributed under the same licence. Third-party components
+remain subject to their own licence terms.

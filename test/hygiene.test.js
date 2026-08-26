@@ -12,13 +12,13 @@ const html = fs.readFileSync(path.join(root, 'renderer', 'index.html'), 'utf8');
 const css = fs.readFileSync(path.join(root, 'renderer', 'styles.css'), 'utf8');
 const readme = fs.readFileSync(path.join(root, 'README.md'), 'utf8');
 
-test('commercial metadata and local-only renderer dependencies are explicit', () => {
+test('open-source metadata and local-only renderer dependencies are explicit', () => {
   assert.equal(pkg.build.appId, 'com.rangercreaky.fleet');
   assert.equal(pkg.author, 'Navaneeth Penumarthi');
-  assert.equal(pkg.license, 'UNLICENSED');
+  assert.equal(pkg.license, 'MIT');
   assert.equal(pkg.build.publish.provider, 'github');
   assert.equal(pkg.build.publish.owner, 'RangerCreaky');
-  assert.match(fs.readFileSync(path.join(root, 'LICENSE'), 'utf8'), /All rights reserved/);
+  assert.match(fs.readFileSync(path.join(root, 'LICENSE'), 'utf8'), /MIT License/);
   assert.match(html, /font-src 'self'/);
   assert.doesNotMatch(`${html}\n${css}`, /fonts\.(googleapis|gstatic)\.com/);
   assert.doesNotMatch(readme, /file:\/\/ path|foundation exists in code/);

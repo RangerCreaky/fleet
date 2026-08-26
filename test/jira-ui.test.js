@@ -74,6 +74,7 @@ test('Jira issue editor uses collapsed multi-choice controls and a bottom commen
   window.confirm = () => true;
   const issue = {
     key: 'SIDE-1', summary: 'Improve Jira editing', updated: '2026-08-23T12:00:00.000Z',
+    suggestedBranchName: 'SIDE-1-improve-jira-editing',
     status: { name: 'In progress', category: 'indeterminate' }, issueType: { name: 'Story' },
     project: { key: 'FLEET', name: 'Fleet' }, activeSprint: { id: '1', name: 'Sprint 1' },
     priority: { name: 'Medium' }, assignee: { displayName: 'Fleet User' }, estimate: {},
@@ -91,6 +92,9 @@ test('Jira issue editor uses collapsed multi-choice controls and a bottom commen
     transitions: [], subtasks: [], attachments: [], allFields: [], fields: [], fieldMapping: {}
   };
   let submittedFields = null;
+  let copiedText = null;
+  let copyCalls = 0;
+  let copyShouldFail = false;
   window.electronAPI = {
     loadFolders: async () => ({ folders: [], settings: {}, storage: { state: 'ok', canWrite: true } }),
     saveFolders: async () => ({ success: true }), loadTrash: async () => ({ trash: [] }),
@@ -104,6 +108,11 @@ test('Jira issue editor uses collapsed multi-choice controls and a bottom commen
     jiraCurrentSprint: async () => ({ success: true, data: { groups: [{ sprint: issue.activeSprint, project: issue.project, issues: [issue] }], total: 1 } }),
     jiraIssue: async () => ({ success: true, data: issue }),
     jiraUpdateIssue: async (_key, fields) => { submittedFields = fields; return { success: true, data: issue }; },
+    copyToClipboard: async text => {
+      copyCalls++;
+      copiedText = text;
+      return copyShouldFail ? { success: false, error: 'Clipboard unavailable' } : { success: true };
+    },
     onDockChanged() {}, onStorageSaveError() {}, onPrepareToQuit() {}, onExpansionState() {},
     onOpenView() {}, onRequestBackupExport() {}, onUpdateStatus() {},
     setDockPreferences: async () => ({ success: true }), getUpdatePreferences: async () => ({ enabled: false })
@@ -126,6 +135,26 @@ test('Jira issue editor uses collapsed multi-choice controls and a bottom commen
   assert.ok(composer.querySelector('.jira-comment-input'));
   assert.ok(composer.querySelector('.jira-comment-composer-footer .jira-add-comment-btn'));
   assert.equal(window.document.querySelector('.jira-save-issue').disabled, true);
+  const development = window.document.querySelector('.jira-development-section');
+  assert.match(development.textContent, /Suggested branch name/);
+  assert.equal(development.querySelector('.jira-branch-name').textContent, 'SIDE-1-improve-jira-editing');
+  development.querySelector('.jira-copy-branch').click();
+  await tick();
+  assert.equal(copyCalls, 1);
+  assert.equal(copiedText, 'SIDE-1-improve-jira-editing');
+  assert.equal(development.querySelector('.jira-copy-branch').textContent, 'Copied');
+  const copyButton = development.querySelector('.jira-copy-branch');
+  copyButton.disabled = false;
+  copyShouldFail = true;
+  copyButton.click();
+  await tick();
+  assert.equal(copyCalls, 2);
+  assert.equal(copyButton.disabled, false);
+  assert.equal(copyButton.textContent, 'Copy');
+  assert.match(window.document.getElementById('toast-message').textContent, /Could not copy the branch name/);
+  const css = fs.readFileSync(path.join(root, 'renderer', 'styles.css'), 'utf8');
+  assert.match(css, /\.jira-branch-suggestion\s*\{[^}]*flex-wrap:\s*wrap/s);
+  assert.match(css, /\.jira-branch-name\s*\{[^}]*overflow-wrap:\s*anywhere/s);
 
   controls[0].querySelector('input[value="1"]').click();
   assert.equal(window.document.querySelector('.jira-save-issue').disabled, false);

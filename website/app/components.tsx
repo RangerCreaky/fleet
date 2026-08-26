@@ -14,7 +14,7 @@ export function Header() {
         <Link href="/security">Security</Link>
         <Link href="/support">Support</Link>
       </nav>
-      <Link className="button button-small" href="/download">Download beta</Link>
+      <a className="button button-small" href={siteConfig.latestReleaseUrl}>Download latest</a>
     </header>
   );
 }
@@ -27,11 +27,12 @@ export function Footer() {
           <img src="/fleet-logo.png" alt="" width="34" height="34" />
           <span>Fleet</span>
         </Link>
-        <p>A private desktop workspace for Jira work and local notes.</p>
+        <p>An open-source desktop workspace for local notes and Jira work.</p>
       </div>
       <div className="footer-links" aria-label="Product links">
         <strong>Product</strong>
-        <Link href="/download">Download</Link>
+        <a href={siteConfig.latestReleaseUrl}>Download</a>
+        <a href={siteConfig.repositoryUrl}>Source code</a>
         <Link href="/security">Security</Link>
         <Link href="/support">Support</Link>
       </div>
@@ -39,12 +40,12 @@ export function Footer() {
         <strong>Legal</strong>
         <Link href="/privacy">Privacy</Link>
         <Link href="/terms">Terms</Link>
-        <Link href="/eula">EULA</Link>
+        <Link href="/eula">Licence</Link>
         <Link href="/refunds">Refunds</Link>
         <Link href="/notices">Notices</Link>
       </div>
       <div className="footer-bottom">
-        <span>© 2026 {siteConfig.operator}. All rights reserved.</span>
+        <span>© 2026 {siteConfig.operator}. Released under the MIT License.</span>
         <span>Fleet is independent software and is not affiliated with or endorsed by Atlassian.</span>
       </div>
     </footer>

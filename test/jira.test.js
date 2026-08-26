@@ -4,7 +4,7 @@ const os = require('node:os');
 const path = require('node:path');
 const test = require('node:test');
 const { JiraClient, normalizeJiraSiteUrl } = require('../jira-client');
-const { CURRENT_SPRINT_JQL, currentSprintJql } = require('../jira-normalize');
+const { CURRENT_SPRINT_JQL, currentSprintJql, suggestBranchName } = require('../jira-normalize');
 
 function fakeSafeStorage() {
   return {
@@ -43,6 +43,21 @@ test('active-sprint JQL is constructed only from validated monitored account ids
   assert.equal(currentSprintJql([{ accountId: 'account:123' }, { accountId: 'abc-456' }]),
     '(assignee = currentUser() OR assignee in ("account:123", "abc-456")) AND sprint in openSprints() ORDER BY Rank ASC, updated DESC');
   assert.equal(currentSprintJql([{ accountId: 'abc") OR project is not EMPTY' }]), CURRENT_SPRINT_JQL);
+});
+
+test('suggested Jira branch names preserve the key and safely slugify the summary', () => {
+  assert.equal(
+    suggestBranchName('enip-17127', 'Tone Selection Scoped by Response Mode'),
+    'ENIP-17127-tone-selection-scoped-by-response-mode'
+  );
+  assert.equal(suggestBranchName('SIDE-2', '  Café   login — déjà vu!  '), 'SIDE-2-cafe-login-deja-vu');
+  assert.equal(suggestBranchName('SIDE-3', 'Straße & Æther'), 'SIDE-3-strasse-aether');
+  assert.equal(suggestBranchName('SIDE-4', ''), 'SIDE-4');
+  assert.equal(suggestBranchName('SIDE-5', '日本語だけ'), 'SIDE-5');
+  const longName = suggestBranchName('SIDE-6', `Long ${'summary '.repeat(80)}`);
+  assert.equal(longName.length, 200);
+  assert.match(longName, /^SIDE-6-long-summary/);
+  assert.doesNotMatch(longName, /-$/);
 });
 
 test('obsolete broker files and device sessions are removed', () => {
@@ -241,6 +256,7 @@ test('Jira transitions retain screen metadata and submit validated fields and co
   assert.equal(detail.transitions[0].to.category, 'done');
   assert.equal(detail.transitions[0].fields.find(field => field.id === 'resolution').required, true);
   assert.equal(detail.transitions[0].fields.find(field => field.id === 'comment').value, '');
+  assert.equal(detail.suggestedBranchName, 'SIDE-1-issue');
 });
 
 test('stale Jira transitions are rejected before a write', async () => {

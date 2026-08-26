@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Footer, Header } from "./components";
+import { siteConfig } from "./site-config";
 
 const features = [
   { number: "01", title: "Capture at thought speed", text: "Open Fleet from the Dock or a shortcut, write in Markdown, and get the thought out before the context disappears." },
@@ -20,14 +21,15 @@ export default function Home() {
 
       <section className="hero">
         <div className="hero-copy">
-          <p className="eyebrow">Free macOS beta</p>
+          <p className="eyebrow">Free and open-source for macOS</p>
           <h1>A faster home for the notes that keep work moving.</h1>
           <p className="hero-lede">Capture, organise, and revisit private local notes without breaking focus. When Jira needs attention, pull your work into a separate Jira Space, manage it, then return to your local workspace.</p>
           <div className="hero-actions">
-            <Link className="button" href="/download">Download for macOS</Link>
+            <a className="button" href={siteConfig.latestReleaseUrl}>Download latest release</a>
+            <a className="text-link" href={siteConfig.repositoryUrl}>View source</a>
             <a className="text-link" href="#how-it-works">See how it works</a>
           </div>
-          <p className="download-note">Free throughout beta. Universal build for Apple silicon and Intel Macs.</p>
+          <p className="download-note">MIT licensed. Releases are hosted on GitHub for Apple silicon and Intel Macs.</p>
         </div>
 
         <div className="product-frame" aria-label="Preview of Fleet showing a private local note workspace">
@@ -40,7 +42,7 @@ export default function Home() {
       </section>
 
       <section className="trust-row" aria-label="Fleet beta characteristics">
-        <span>Local-first notes</span><span>Markdown workflow</span><span>Jira when needed</span><span>Free beta</span>
+        <span>Local-first notes</span><span>No external database</span><span>Jira when needed</span><span>MIT open source</span>
       </section>
 
       <section className="section" id="features">
@@ -60,26 +62,26 @@ export default function Home() {
       <section className="privacy-band">
         <div><p className="section-label">Privacy by boundary</p><h2>Your notes remain yours.</h2></div>
         <div className="privacy-points">
-          <p><strong>Local notes stay on the Mac.</strong><span>Fleet stores notes and managed attachments in its local application data and portable backups.</span></p>
-          <p><strong>Jira remains the source of truth.</strong><span>Issue changes go to Jira and remain governed by the connected user’s Jira permissions.</span></p>
-          <p><strong>No ad tracking.</strong><span>The beta website and application contain no advertising SDKs or cross-site tracking.</span></p>
+          <p><strong>No Fleet cloud or external database.</strong><span>Notes, attachments, settings, backups, and encrypted Jira credentials are stored only on the user’s Mac.</span></p>
+          <p><strong>Jira connects directly.</strong><span>Fleet sends Jira requests only to the Jira Cloud site chosen by the user. The Jira token is not sent to Fleet’s developer, website, or any Fleet database.</span></p>
+          <p><strong>No telemetry or ad tracking.</strong><span>The application contains no analytics, advertising SDKs, hosted accounts, or note-sync service.</span></p>
           <Link className="light-link" href="/privacy">Read the privacy notice</Link>
         </div>
       </section>
 
       <section className="section beta-section">
-        <div><p className="section-label">Public beta</p><h2>Use every beta feature at no cost.</h2><p>There is no payment, subscription, trial timer, or card requirement during the beta. Feedback helps determine what Fleet becomes next.</p></div>
-        <Link className="button" href="/download">Get Fleet for macOS</Link>
+        <div><p className="section-label">Open source</p><h2>Free to use, inspect, modify, and share.</h2><p>Fleet is released under the MIT License. There is no payment, subscription, trial timer, account, or card requirement.</p></div>
+        <a className="button" href={siteConfig.latestReleaseUrl}>Get the latest release</a>
       </section>
 
       <section className="section faq-section">
         <div className="section-heading"><p className="section-label">Questions</p><h2>Before you install.</h2></div>
         <div className="faq-list">
           <details><summary>What is Fleet mainly for?</summary><p>Fleet is first a fast, private Mac workspace for capturing, organising, and revisiting local Markdown notes. Jira Space is an additional workflow for connected project work.</p></details>
-          <details><summary>Are my private notes uploaded?</summary><p>No. Notes and note attachments are stored locally. Jira issue data is kept separate and is not included in Fleet note backups.</p></details>
+          <details><summary>Are my private notes or Jira token uploaded to Fleet?</summary><p>No. Fleet has no backend or external database. Notes and attachments remain local, and the encrypted Jira token stays on the laptop. Jira requests go directly to the user’s configured Jira Cloud site.</p></details>
           <details><summary>Does Fleet replace Jira?</summary><p>No. Fleet is a focused desktop interface. Jira remains the source of truth, and unsupported actions open in Jira.</p></details>
           <details><summary>Can Fleet bypass company Jira permissions?</summary><p>No. Fleet only shows and changes what the connected Jira account is already permitted to access.</p></details>
-          <details><summary>Will the beta remain free?</summary><p>Every beta build is free. If paid plans are introduced later, pricing and terms will be shown before anyone is charged.</p></details>
+          <details><summary>Is Fleet free and open source?</summary><p>Yes. Fleet source code and release binaries are provided under the MIT License. The latest version is published through GitHub Releases.</p></details>
         </div>
       </section>
 

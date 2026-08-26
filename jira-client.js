@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const {
-  JIRA_ACCOUNT_ID_RE, currentSprintJql, textToAdf, discoverFields, normalizeIssue,
+  JIRA_ACCOUNT_ID_RE, currentSprintJql, suggestBranchName, textToAdf, discoverFields, normalizeIssue,
   normalizeEditableFields, normalizeTransitionFields, groupIssues, validateUpdateFields
 } = require('./jira-normalize');
 
@@ -418,6 +418,7 @@ class JiraClient {
     const normalized = normalizeIssue(issue, fieldInfo, names);
     return {
       ...normalized,
+      suggestedBranchName: suggestBranchName(normalized.key, normalized.summary),
       editableFields: normalizeEditableFields(editmeta, issue.fields || {}),
       transitions: (transitions?.transitions || []).map(item => ({
         id: String(item.id), name: item.name || 'Transition', hasScreen: item.hasScreen === true,

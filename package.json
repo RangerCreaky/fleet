@@ -45,6 +45,7 @@
   "scripts": {
     "dist": "npm run dist:release",
     "dist:release": "node scripts/release-preflight.js && electron-builder --mac --publish never",
+    "dist:beta": "node scripts/beta-build.js",
     "dist:dir": "node scripts/dev-build.js",
     "verify:release": "node scripts/verify-release.js",
     "start": "electron .",

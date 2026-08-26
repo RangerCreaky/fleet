@@ -44,11 +44,24 @@ Open the [latest GitHub release](https://github.com/RangerCreaky/Fleet/releases/
 
 ### Building a distributable (macOS)
 
+For an unsigned, unnotarized beta DMG intended for a small group of testers:
+
+```bash
+npm run dist:beta
+```
+
+The universal DMG is written to `dist/`. macOS Gatekeeper will warn users because
+this beta is not signed with an Apple Developer ID or notarized by Apple.
+
+For a signed and notarized production release:
+
 ```bash
 npm run dist
 ```
 
-This runs `electron-builder` and produces a Mac installer (see `package.json` → `build` for app ID and DMG settings).
+The production command intentionally stops unless the Apple signing and
+notarization credentials are present. Both commands use `electron-builder` and
+the app ID and DMG settings in `package.json`.
 
 ---
 
@@ -144,6 +157,13 @@ The primary local note store is **`fleet-data.json`** in Fleet’s application-d
 - **Structured but lightweight:** Folders keep projects separate; pinning and reordering handle priority without a heavy database UI.
 - **Portable text:** Markdown, export to `.md`, and clipboard copy keep your notes usable anywhere.
 - **Privacy-first by default:** Local JSON storage; no account or cloud required to use the app.
+
+---
+
+## Development transparency
+
+Fleet was developed with assistance from AI coding tools. All changes are
+reviewed, tested, and published openly under the MIT License.
 
 ---
 

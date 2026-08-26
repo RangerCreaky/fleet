@@ -24,8 +24,21 @@ test('release packaging is universal and hardened', () => {
   assert.equal(packageJson.build.mac.hardenedRuntime, true);
   assert.equal(packageJson.build.afterSign, 'scripts/notarize.js');
   assert.match(packageJson.scripts.dist, /dist:release/);
+  assert.match(packageJson.scripts['dist:beta'], /beta-build/);
   assert.equal(packageJson.devDependencies.electron, '^43.4.1');
   assert.equal(packageJson.devDependencies['electron-builder'], '^26.15.3');
+});
+
+test('unsigned beta builds are explicit and cannot weaken the production release', () => {
+  const betaBuild = fs.readFileSync(path.join(root, 'scripts', 'beta-build.js'), 'utf8');
+  assert.match(betaBuild, /CSC_IDENTITY_AUTO_DISCOVERY/);
+  assert.match(betaBuild, /FLEET_DEV_BUILD/);
+  assert.match(betaBuild, /--universal/);
+  assert.match(betaBuild, /unsigned and unnotarized/);
+
+  const preflight = fs.readFileSync(path.join(root, 'scripts', 'release-preflight.js'), 'utf8');
+  assert.match(preflight, /APPLE_ID/);
+  assert.match(preflight, /CSC_LINK or CSC_NAME/);
 });
 
 test('unused filesystem packages are absent from manifest and lockfile', () => {
